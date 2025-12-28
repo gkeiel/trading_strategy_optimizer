@@ -1,0 +1,13 @@
+{
+  "start": "2024-01-01",
+  "market": "US",
+  "preset": "basic",
+
+  "optimize": {
+    "ind_t": "SMA",
+    "params": [
+      {"name": "short", "min": 5,  "max": 30},
+      {"name": "long", "min": 20, "max": 100}
+    ]
+  }
+}
