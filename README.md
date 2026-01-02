@@ -1,28 +1,66 @@
 # Trading Strategy Optimizer
 
-This project provides a Python script for **backtesting and optimizing trading strategies based on technical indicators** to spot market time series. It also includes a script for **automatic generation of buy and sell signals for global assets** following the selected strategy.
+This project provides a Python script for **backtesting and optimizing trading strategies based on technical indicators** applied to spot market time series. Additionally, it includes a script for **automatic generation of buy and sell signals for global assets** for the best strategies.
 
 As main advantages, the project provides:
 - uses **simulated annealing algorithm** to search for the best strategies. 
 - recurring **trading signals and information via Telegram channel** to **avoid the need for manual chart analysis**.
 - **open-source code**, allowing **flexibility in choosing moving averages** and comparing all strategies.
 
-Telegram open channel with daily signals run via GitHub Actions. Anyone can sign up to get a feel for what this bot can offer.
+Telegram open channel with daily signals run via GitHub Actions. Anyone can sign up to get a feel for what the bot can offer.
 [t.me/market_trading_signals_free](https://t.me/market_trading_signals_free)
 
-## 📊 Features
 
-- **Data download**: Downloads market data through the Yahoo Finance API.
-- **Moving average crossovers**: Implements 2 or 3 moving average crossover strategies (SMA, WMA, or EMA) to identify possible trends.
-- **Backtesting**: Runs historical backtests, generating figures and summaries for decision-making.
-- **Optimization**: Performs an optimization with simulated annealing technique to find the best strategies.
-- **Telegram notifications**: Sends trading signals from the selected strategy directly to user smartphone or computer.
-- **Automatic scheduling**: Enables recurrent (daily) execution via GitHub Actions.
-- **Configuration files**: Uses `.env` for private environment variables, `.json` for configuration parameters, `.json` for tickers list, and `.csv` for strategies list.
+## 🧩 Architecture Overview
+
+The project is organized around a modular pipeline, where each component has a responsibility:
+
+- **Loader** handles configuration files (`.json` for configuration parameters, `.json` for tickers) and market data acquisition.
+- **Indicator** applies technical indicators (2 or 3 moving average) and generates trading signals.
+- **Backtester** evaluates strategies on historical data and computes performance metrics.
+- **Optimizer** searches the indicator parameter space using heuristic optimization.
+- **Strategies** scores and ranks candidate strategies based on configurable objective functions.
+- **Notifier** generate recurrent (daily) signals and notifications for the Telegram bot.
+
+This separation allows the optimization process to remain independent from trading signal execution, enabling reuse of optimized strategies across different workflows.
+
+trading_strategy_optimizer/ 
+│  
+├── core/   
+│   ├── __init__.py 
+│   ├── loader.py  
+│   ├── indicator.py  
+│   ├── backtester.py  
+│   ├── optimizer.py  
+│   ├── strategies.py  
+│   ├── exporter.py  
+│   └── notifier.py  
+│  
+├── config/  
+│   ├── config.json  
+│   └── tickers.json  
+│  
+├── data/  
+│   └── results/  
+│       ├── strategies.csv  
+│       ├── backtests/  
+│       └── logs/  
+│  
+├── trading_strategy_optimizer.py  
+├── trading_strategy_bot.py  
+│  
+├── .github/  
+│   └── workflows/  
+│       └── trading_strategy_bot.yml  
+│  
+├── requirements.txt  
+├── README.md  
+└── LICENSE  
+
 
 ## 📈 Available Strategies
 
-The project currently supports **dual and triple moving average crossover** strategies for generating trading signals, using the following methods:
+The project currently supports **dual and triple moving average crossover** strategies for generating trading signals, using the following calculation methods:
 - **SMA (Simple Moving Average)**
 - **EMA (Exponential Moving Average)**
 - **WMA (Weighted Moving Average)**
