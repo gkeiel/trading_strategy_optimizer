@@ -11,52 +11,51 @@ Telegram open channel with daily signals run via GitHub Actions. Anyone can sign
 [t.me/market_trading_signals_free](https://t.me/market_trading_signals_free)
 
 
-## 🧩 Architecture Overview
+## 🗂 Project Structure
 
-The project is organized around a modular pipeline, where each component has a responsibility:
+The project is organized around a modular pipeline, where each class has a responsibility:
 
 - **Loader** handles configuration files (`.json` for configuration parameters, `.json` for tickers) and market data acquisition.
-- **Indicator** applies technical indicators (2 or 3 moving average) and generates trading signals.
+- **Indicator** applies technical indicators (MA crossover, Bollinger Bands, MACD) and generates trading signals.
 - **Backtester** evaluates strategies on historical data and computes performance metrics.
 - **Optimizer** searches the indicator parameter space using heuristic optimization.
 - **Strategies** scores and ranks candidate strategies based on configurable objective functions.
 - **Notifier** generate recurrent (daily) signals and notifications for the Telegram bot.
 
-This separation allows the optimization process to remain independent from trading signal execution, enabling reuse of optimized strategies across different workflows.
-
-trading_strategy_optimizer/ 
-│  
-├── core/   
-│   ├── __init__.py 
-│   ├── loader.py  
-│   ├── indicator.py  
-│   ├── backtester.py  
-│   ├── optimizer.py  
-│   ├── strategies.py  
-│   ├── exporter.py  
-│   └── notifier.py  
-│  
-├── config/  
-│   ├── config.json  
-│   └── tickers.json  
-│  
-├── data/  
-│   └── results/  
-│       ├── strategies.csv  
-│       ├── backtests/  
-│       └── logs/  
-│  
-├── trading_strategy_optimizer.py  
-├── trading_strategy_bot.py  
-│  
-├── .github/  
-│   └── workflows/  
-│       └── trading_strategy_bot.yml  
-│  
-├── requirements.txt  
-├── README.md  
-└── LICENSE  
-
+ ```text
+ trading_strategy_optimizer/ 
+ │  
+ ├── core/   
+ │   ├── __init__.py  
+ │   ├── loader.py  
+ │   ├── indicator.py  
+ │   ├── backtester.py  
+ │   ├── optimizer.py  
+ │   ├── strategies.py  
+ │   ├── exporter.py  
+ │   └── notifier.py  
+ │  
+ ├── config/  
+ │   ├── config.json  
+ │   └── tickers.json  
+ │  
+ ├── data/  
+ │   └── results/  
+ │       ├── strategies.csv  
+ │       ├── backtests/  
+ │       └── logs/  
+ │  
+ ├── trading_strategy_optimizer.py  
+ ├── trading_strategy_bot.py  
+ │  
+ ├── .github/  
+ │   └── workflows/  
+ │       └── trading_strategy_bot.yml  
+ │  
+ ├── requirements.txt  
+ ├── README.md  
+ └── LICENSE  
+ ```
 
 ## 📈 Available Strategies
 

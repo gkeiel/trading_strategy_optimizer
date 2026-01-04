@@ -47,11 +47,18 @@ class Loader:
         ]
     SUFFIXES = {"AU":".AX", "BR":".SA", "CN":".SS", "CA":".TO"}
     
-    def load_search_space(self):
+    def load_search_space(self):    
         with open(self.file_config, "r", encoding="utf-8") as f:
             config = json.load(f)
         optimize = config.get("optimize")
-        return {"ind_t": optimize["ind_t"], "params": optimize["params"]}
+        
+        space = []
+        for opt in optimize:
+            space.append({
+                "ind_t":  opt["ind_t"],
+                "params": opt["params"]
+            })
+        return space
     
     def format_ticker(self, ticker):
         if self.market == "BR" and not ticker.endswith(".SA"):

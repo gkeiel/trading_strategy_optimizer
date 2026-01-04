@@ -41,7 +41,7 @@ class Exporter:
                 bst_df.to_excel(writer, sheet_name=ticker[:10], index=False)
 
     def update_best_results(self, bst_data):
-        # update best results (for use in main_bot)
+        # update best results (for use in trading_strategy_bot.py)
         with open("data/results/strategies.csv", "w") as f:
             f.write("Ticker,Indicator,Parameters\n")
             for ticker, bst_df in bst_data.items():

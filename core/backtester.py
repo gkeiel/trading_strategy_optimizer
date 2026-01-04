@@ -123,15 +123,6 @@ class Backtester:
         
         # plot returns
         plt.figure(figsize=(12,6))
-        plt.plot(self.df.index, self.df["Close"], label=f"{ticker}")
-        plt.plot(self.df.index, self.df["Predicted_Close"], label="Predictions")
-        plt.title(f"{ticker} - Price")
-        plt.legend()
-        plt.grid(True)
-        plt.savefig(f"data/results/{label}_forecast.png", dpi=300, bbox_inches="tight")
-        plt.close()
-
-        plt.figure(figsize=(12,6))
         plt.plot(self.df.index, self.df["Cumulative_Market"], label="Buy & Hold")
         plt.plot(self.df.index, self.df["Cumulative_Strategy"], label="Strategy")
         plt.title(f"{ticker} - Backtest {ind_t}{'/'.join(params)}")

@@ -1,6 +1,7 @@
-import os, sys, traceback
+import os, sys, traceback, itertools
 from core.loader import Loader
 from core.strategies import Strategies
+from core.backtester import Backtester
 from core.optimizer import Optimizer
 from core.exporter import Exporter
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -18,16 +19,16 @@ def main():
     res_data = {}
 
     try:
-        # download data and run optimization (for each ticker)
-        for ticker in tickers:
+        # download data and run optimization (for each ticker and indicator)
+        for ticker, indicators_space in itertools.product(tickers, search_space):
 
             # download data (only once)
             if ticker not in raw_data:
                 raw_data[ticker] = loader.download_data(ticker)
-            df = raw_data[ticker]
+            df = raw_data[ticker].copy()
             
             # run optimization
-            step_data = Optimizer(df, search_space).search()
+            step_data = Optimizer(df, indicators_space).search()
             
             if ticker not in res_data:
                 res_data[ticker] = {}
@@ -37,7 +38,7 @@ def main():
                 indicator = step["indicator"]
                 df        = step["df"]
                 metrics   = step["metrics"]
-                
+              
                 # store processed data and result data
                 ind_t  = indicator["ind_t"]  # indicator title
                 ind_p  = indicator["ind_p"]  # indicator parameters
@@ -50,6 +51,7 @@ def main():
                     "Parameters": ind_p,
                     **metrics
                 }
+                Backtester(df).plot_res(label)
 
         # compute best strategies (for each ticker)
         bst_data = Strategies().best_strategy(res_data)

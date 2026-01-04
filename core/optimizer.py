@@ -13,16 +13,16 @@ class Optimizer:
         self.space = search_space
         self.data  = []
 
-    def evaluate(self, params):
+    def evaluate(self, indicator):
         df = self.df.copy()
         
         # setup indicator
-        df = Indicator(params).setup_indicator(df)
+        df = Indicator(indicator).setup_indicator(df)
 
         # run backtest
         backtest = Backtester(df)
-        df       = backtest.run_strategy(params)
-                
+        df       = backtest.run_strategy(indicator)
+        
         # compute metrics
         metrics = {
             "Return_Market": df["Cumulative_Market"].iloc[-1],
@@ -31,17 +31,16 @@ class Optimizer:
             "Sharpe": df["Strategy"].mean() / df["Strategy"].std()*pow(len(df), 0.5),
             "Max_Drawdown": abs(df["Drawdown"].min()),
         }
-        # backtest.plot_res("TEST")
         
         # compute score
         score = Strategies().compute_score(metrics)
         
-        # append
-        self.data.append({"indicator": params, "df": df, "metrics": metrics, "score": score})
+        # append to data
+        self.data.append({"indicator": indicator, "df": df, "metrics": metrics, "score": score})
         return score, df, metrics
     
     def search(self):
-        start_params = {
+        start_indicator = {
             "ind_t": self.space["ind_t"],
             "ind_p": [
                 int((p["min"] +p["max"])/2)
@@ -49,21 +48,36 @@ class Optimizer:
             ]
         }
         
-        best_params, best_score = self.simulated_annealing(start_params=start_params)
+        self.log   = open(f"data/results/{start_indicator['ind_t']}_log.txt", "w")
+        best_params, best_score = self.simulated_annealing(start_indicator=start_indicator)
+        self.log.close()
         return self.data
     
-    def random_neighbor(self, params, alpha):
-        x = copy.deepcopy(params)
+    def random_neighbor(self, indicator, alpha):
+        x = copy.deepcopy(indicator)
 
         for i, val in enumerate(x["ind_p"]):
             pmin  = self.space["params"][i]["min"]
             pmax  = self.space["params"][i]["max"]
             new_v = val +random.randint(-alpha, alpha)
             x["ind_p"][i] = max(pmin, min(pmax, new_v))
+                    
+        if x["ind_t"] == "MACD":
+            fast, slow, signal = x["ind_p"]
+            if fast   >= slow: fast   = slow -1
+            if signal >= slow: signal = slow -1
+            
+            fast   = max(self.space["params"][0]["min"], fast)
+            signal = max(self.space["params"][2]["min"], signal)
+            x["ind_p"] = [fast, slow, signal]
+            
+        if x["ind_t"] in ["SMA", "EMA", "WMA"] and len(x["ind_p"]) >= 2:
+            x["ind_p"] = sorted(x["ind_p"])
+
         return x
 
-    def hill_climbing(self, start_params, alpha=5, n=5, k_max=30):
-        x_i       = start_params
+    def hill_climbing(self, start_indicator, alpha=20, n=3, k_max=30):
+        x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
         k         = 0
         
@@ -80,10 +94,10 @@ class Optimizer:
 
         return x_i, f_i
     
-    def simulated_annealing(self, start_params, alpha=10, beta=0.98, T_0=1, n=5, k_max=30):
-        x_i       = start_params
+    def simulated_annealing(self, start_indicator, alpha=20, beta=0.98, n=3, k_max=30):
+        x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
-        T         = T_0
+        T         = 1
         k         = 0
         
         while k < k_max:
@@ -104,5 +118,7 @@ class Optimizer:
             
             T     = beta*T
             alpha = max(1, int(alpha*beta))
+            self.log.write(f"k = {k}: x = {x_i} | f(x) = {f_i:.4f} | T = {T:.2f} | alpha = {alpha}\n")
 
+        self.log.flush()
         return x_i, f_i
