@@ -1,11 +1,11 @@
 # Trading Strategy Optimizer
 
-This project provides a Python script for **backtesting and optimizing trading strategies based on technical indicators** applied to spot market time series. Additionally, it includes a script for **automatic generation of buy and sell signals for global assets** for the best strategies.
+This project provides a Python script for **backtesting and optimizing trading strategies based on technical indicators**, being applied to spot market time series. Additionally, it includes a script for **automatic generation of buy and sell signals for global assets** for the optimized strategy.
 
 As main advantages, the project provides:
-- uses **simulated annealing algorithm** to search for the best strategies. 
+- **simulated annealing algorithm** to perform a global search for the best strategies. 
 - recurring **trading signals and information via Telegram channel** to **avoid the need for manual chart analysis**.
-- **open-source code**, allowing **flexibility in choosing moving averages** and comparing all strategies.
+- **open-source code**, allowing **flexibility in choosing technical indicators** and comparing all strategies.
 
 Telegram open channel with daily signals run via GitHub Actions. Anyone can sign up to get a feel for what the bot can offer.
 [t.me/market_trading_signals_free](https://t.me/market_trading_signals_free)
@@ -15,12 +15,16 @@ Telegram open channel with daily signals run via GitHub Actions. Anyone can sign
 
 The project is organized around a modular pipeline, where each class has a responsibility:
 
-- **Loader** handles configuration files (`.json` for configuration parameters, `.json` for tickers) and market data acquisition.
+- **Loader** handles configuration files for tickers and market settings.
 - **Indicator** applies technical indicators (MA crossover, Bollinger Bands, MACD) and generates trading signals.
 - **Backtester** evaluates strategies on historical data and computes performance metrics.
 - **Optimizer** searches the indicator parameter space using heuristic optimization.
 - **Strategies** scores and ranks candidate strategies based on configurable objective functions.
-- **Notifier** generate recurrent (daily) signals and notifications for the Telegram bot.
+- **Notifier** generate recurrent signals and notifications for a Telegram bot.
+
+
+
+The project has the following structure:
 
  ```text
  trading_strategy_optimizer/ 
@@ -40,10 +44,11 @@ The project is organized around a modular pipeline, where each class has a respo
  │   └── tickers.json  
  │  
  ├── data/  
- │   └── results/  
+ │   └── results/ 
+ |       ├── best_results.xlsx 
  │       ├── strategies.csv  
- │       ├── backtests/  
- │       └── logs/  
+ │       ├── backtests.png   
+ │       └── logs.txt   
  │  
  ├── trading_strategy_optimizer.py  
  ├── trading_strategy_bot.py  
@@ -59,12 +64,13 @@ The project is organized around a modular pipeline, where each class has a respo
 
 ## 📈 Available Strategies
 
-The project currently supports **dual and triple moving average crossover** strategies for generating trading signals, using the following calculation methods:
-- **SMA (Simple Moving Average)**
-- **EMA (Exponential Moving Average)**
-- **WMA (Weighted Moving Average)**
-
-These options allow the user to compare the performance of different approaches within the selected market.
+The project currently supports the following indicators:
+- **Moving average crossover** using:
+  - **SMA (Simple Moving Average)**;
+  - **EMA (Exponential Moving Average)**;
+  - **WMA (Weighted Moving Average)**.
+- **Bollinger bands**;
+- **Moving Average Convergence/Divergence (MACD)**.
 
 ## ⚙️ How to Use
 
@@ -86,7 +92,6 @@ These options allow the user to compare the performance of different approaches 
    - Create a Telegram bot and obtain its `TOKEN`.
    - Create a Telegram channel and obtain its `CHAT_ID`.
    - Add the bot as channel administrator.
-   - Add keys to `.env` file to be read by `trading_strategy_bot.py`.
 
 4. **Run the script**
    - To run the optimization with backtests, execute:
@@ -97,7 +102,7 @@ These options allow the user to compare the performance of different approaches 
      ```bash
      python trading_strategy_bot.py
      ```
-   - To automate the signal generation with GitHub Actions, create the repository secrets `TOKEN` and `CHAT_ID` for the already preconfigured workflow.
+   - To automate the signal generation with GitHub Actions, create the repository secrets `TOKEN` and `CHAT_ID` for the preconfigured workflow.
 
 ## 🖼️ Output Examples
 

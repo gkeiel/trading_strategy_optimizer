@@ -59,7 +59,8 @@ class Optimizer:
         for i, val in enumerate(x["ind_p"]):
             pmin  = self.space["params"][i]["min"]
             pmax  = self.space["params"][i]["max"]
-            new_v = val +random.randint(-alpha, alpha)
+            step  = max(1, int(alpha*(pmax -pmin)))
+            new_v = val +random.randint(-step, step)
             x["ind_p"][i] = max(pmin, min(pmax, new_v))
                     
         if x["ind_t"] == "MACD":
@@ -70,13 +71,10 @@ class Optimizer:
             fast   = max(self.space["params"][0]["min"], fast)
             signal = max(self.space["params"][2]["min"], signal)
             x["ind_p"] = [fast, slow, signal]
-            
-        if x["ind_t"] in ["SMA", "EMA", "WMA"] and len(x["ind_p"]) >= 2:
-            x["ind_p"] = sorted(x["ind_p"])
 
         return x
 
-    def hill_climbing(self, start_indicator, alpha=20, n=3, k_max=30):
+    def hill_climbing(self, start_indicator, alpha=1, n=3, k_max=40):
         x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
         k         = 0
@@ -94,7 +92,7 @@ class Optimizer:
 
         return x_i, f_i
     
-    def simulated_annealing(self, start_indicator, alpha=20, beta=0.98, n=3, k_max=30):
+    def simulated_annealing(self, start_indicator, alpha=1, beta=0.99, n=3, k_max=40):
         x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
         T         = 1
