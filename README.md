@@ -1,11 +1,11 @@
 # Trading Strategy Optimizer
 
-This project provides a Python script for **backtesting and optimizing trading strategies based on technical indicators**, being applied to spot market time series. Additionally, it includes a script for **automatic generation of buy and sell signals for global assets** for the optimized strategy.
+This project provides a Python script for **backtesting and heuristic optimization of trading strategies based on technical indicators**, being applied to spot market time series. Additionally, it includes a script for **automatic generation of buy and sell signals for global assets** for the optimized strategy.
 
 As main advantages, the project provides:
 - **simulated annealing algorithm** to perform a global search for the best strategies. 
-- recurring **trading signals and information via Telegram channel** to **avoid the need for manual chart analysis**.
 - **open-source code**, allowing **flexibility in choosing technical indicators** and comparing all strategies.
+- recurring **trading signals and information via Telegram channel**.
 
 Telegram open channel with daily signals run via GitHub Actions. Anyone can sign up to get a feel for what the bot can offer.
 [t.me/market_trading_signals_free](https://t.me/market_trading_signals_free)
@@ -23,12 +23,14 @@ The project is organized around a modular pipeline, where each class has a respo
 - **Notifier** generate recurrent signals and notifications for a Telegram bot.
 
 
-
 The project has the following structure:
 
  ```text
  trading_strategy_optimizer/ 
  │  
+ ├── trading_strategy_optimizer.py  
+ ├── trading_strategy_bot.py  
+ |  
  ├── core/   
  │   ├── __init__.py  
  │   ├── loader.py  
@@ -50,9 +52,6 @@ The project has the following structure:
  │       ├── backtests.png   
  │       └── logs.txt   
  │  
- ├── trading_strategy_optimizer.py  
- ├── trading_strategy_bot.py  
- │  
  ├── .github/  
  │   └── workflows/  
  │       └── trading_strategy_bot.yml  
@@ -65,7 +64,7 @@ The project has the following structure:
 ## 📈 Available Strategies
 
 The project currently supports the following indicators:
-- **Moving average crossover** using:
+- **Moving Average crossover** using:
   - **SMA (Simple Moving Average)**;
   - **EMA (Exponential Moving Average)**;
   - **WMA (Weighted Moving Average)**.
@@ -84,8 +83,8 @@ The project currently supports the following indicators:
     ```
 
 2. **Configure tickers and indicators**
-   - In `config.json` add the various configuration parameters.
-   - In `tickers.json` add the stock codes to analyze, one per line.
+   - In `config.json` add the configuration parameters.
+   - In `tickers.json` add the stock symbols to analyze, one per line.
    - In `strategies.csv` lists the stocks to generate trading signals, each with its corresponding best strategy.
 
 3. **Configure Telegram**

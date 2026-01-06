@@ -59,7 +59,7 @@ class Optimizer:
         for i, val in enumerate(x["ind_p"]):
             pmin  = self.space["params"][i]["min"]
             pmax  = self.space["params"][i]["max"]
-            step  = max(1, int(alpha*(pmax -pmin)))
+            step  = max(1, int(alpha*(pmax -pmin)/5))
             new_v = val +random.randint(-step, step)
             x["ind_p"][i] = max(pmin, min(pmax, new_v))
                     
