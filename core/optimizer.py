@@ -9,9 +9,10 @@ import math, random, copy
 # =====================================================
 class Optimizer:
     def __init__(self, df, search_space):
-        self.df    = df
-        self.space = search_space
-        self.data  = []
+        self.df       = df
+        self.space    = search_space
+        self.data     = []
+        self.data_opt = []
 
     def evaluate(self, indicator):
         df = self.df.copy()
@@ -59,7 +60,7 @@ class Optimizer:
         for i, val in enumerate(x["ind_p"]):
             pmin  = self.space["params"][i]["min"]
             pmax  = self.space["params"][i]["max"]
-            step  = max(1, int(alpha*(pmax -pmin)/5))
+            step  = max(1, round(alpha*(pmax -pmin)/5))
             new_v = val +random.randint(-step, step)
             x["ind_p"][i] = max(pmin, min(pmax, new_v))
                     
@@ -74,7 +75,7 @@ class Optimizer:
 
         return x
 
-    def hill_climbing(self, start_indicator, alpha=1, n=3, k_max=40):
+    def hill_climbing(self, start_indicator, alpha=1, n=2, k_max=60):
         x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
         k         = 0
@@ -92,7 +93,7 @@ class Optimizer:
 
         return x_i, f_i
     
-    def simulated_annealing(self, start_indicator, alpha=1, beta=0.99, n=3, k_max=40):
+    def simulated_annealing(self, start_indicator, alpha=1, beta=0.95, n=2, k_max=60):
         x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
         T         = 1
@@ -115,8 +116,9 @@ class Optimizer:
                         f_i = f_j
             
             T     = beta*T
-            alpha = max(1, int(alpha*beta))
-            self.log.write(f"k = {k}: x = {x_i} | f(x) = {f_i:.4f} | T = {T:.2f} | alpha = {alpha}\n")
-
+            alpha = alpha*beta
+            self.log.write(f"k = {k}: x = {x_i} | f(x) = {f_i:.4f} | T = {T:.2f} | alpha = {alpha:.2f}\n")
+            self.data_opt.append({"k": k, "score": f_i, "T": T, "alpha": alpha})
+            
         self.log.flush()
         return x_i, f_i

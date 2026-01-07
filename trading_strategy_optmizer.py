@@ -1,8 +1,8 @@
 import os, sys, traceback, itertools
 from core.loader import Loader
 from core.strategies import Strategies
-from core.backtester import Backtester
 from core.optimizer import Optimizer
+from core.visualizer import Visualizer
 from core.exporter import Exporter
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -17,7 +17,8 @@ def main():
     raw_data = {}
     pro_data = {}
     res_data = {}
-
+    Visualizer(0).clear_folder()
+    
     try:
         # download data and run optimization (for each ticker and indicator)
         for ticker, indicators_space in itertools.product(tickers, search_space):
@@ -28,18 +29,18 @@ def main():
             df = raw_data[ticker].copy()
             
             # run optimization
-            step_data = Optimizer(df, indicators_space).search()
+            optimization = Optimizer(df, indicators_space)
+            step_data    = optimization.search()
             
             if ticker not in res_data:
                 res_data[ticker] = {}
                 pro_data[ticker] = {}
 
+            # visualize results
             for step in step_data:
-                indicator = step["indicator"]
-                df        = step["df"]
-                metrics   = step["metrics"]
-              
+                
                 # store processed data and result data
+                indicator, df, metrics = step["indicator"], step["df"], step["metrics"]
                 ind_t  = indicator["ind_t"]  # indicator title
                 ind_p  = indicator["ind_p"]  # indicator parameters
                 params = "_".join(str(p) for p in ind_p)
@@ -51,22 +52,24 @@ def main():
                     "Parameters": ind_p,
                     **metrics
                 }
-                Backtester(df).plot_res(label)
+                
+                visualizer = Visualizer(df)
+                visualizer.plot_results(label)
+            
+            visualizer.plot_optimization(optimization.data_opt, label)
+
 
         # compute best strategies (for each ticker)
         bst_data = Strategies().best_strategy(res_data)
 
-        # exports dataframe for analysis
+        # export dataframe for analysis
         exporter = Exporter()
         exporter.export_dataframe(pro_data)
         
-        # exports backtesting results
-        exporter.export_results(res_data)
-
-        # exports backtesting results sorted by best
+        # export backtesting results sorted by best
         exporter.export_best_results(bst_data)
 
-        # updates best strategies
+        # update best strategies
         exporter.update_best_results(bst_data)
         
     except Exception as err:

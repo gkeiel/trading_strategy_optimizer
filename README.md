@@ -1,14 +1,11 @@
 # Trading Strategy Optimizer
 
-This project provides a Python script for **backtesting and heuristic optimization of trading strategies based on technical indicators**, being applied to spot market time series. Additionally, it includes a script for **automatic generation of buy and sell signals for global assets** for the optimized strategy.
+This project provides a Python script for **backtesting and heuristic optimization of trading strategies based on technical indicators**, being applied to spot market time series.
 
 As main advantages, the project provides:
 - **simulated annealing algorithm** to perform a global search for the best strategies. 
-- **open-source code**, allowing **flexibility in choosing technical indicators** and comparing all strategies.
-- recurring **trading signals and information via Telegram channel**.
-
-Telegram open channel with daily signals run via GitHub Actions. Anyone can sign up to get a feel for what the bot can offer.
-[t.me/market_trading_signals_free](https://t.me/market_trading_signals_free)
+- creation of **spreadsheets and figures with performance results** from backtesting and optimization procedure.
+- **open-source code**, allowing **flexibility in adjusting the search space** and **implementing technical indicators**.
 
 
 ## 🗂 Project Structure
@@ -20,7 +17,6 @@ The project is organized around a modular pipeline, where each class has a respo
 - **Backtester** evaluates strategies on historical data and computes performance metrics.
 - **Optimizer** searches the indicator parameter space using heuristic optimization.
 - **Strategies** scores and ranks candidate strategies based on configurable objective functions.
-- **Notifier** generate recurrent signals and notifications for a Telegram bot.
 
 
 The project has the following structure:
@@ -28,8 +24,7 @@ The project has the following structure:
  ```text
  trading_strategy_optimizer/ 
  │  
- ├── trading_strategy_optimizer.py  
- ├── trading_strategy_bot.py  
+ ├── trading_strategy_optimizer.py 
  |  
  ├── core/   
  │   ├── __init__.py  
@@ -51,10 +46,6 @@ The project has the following structure:
  │       ├── strategies.csv  
  │       ├── backtests.png   
  │       └── logs.txt   
- │  
- ├── .github/  
- │   └── workflows/  
- │       └── trading_strategy_bot.yml  
  │  
  ├── requirements.txt  
  ├── README.md  
@@ -79,31 +70,19 @@ The project currently supports the following indicators:
     pip install numpy
     pip install yfinance
     pip install requests
-    pip install python-dotenv
     ```
 
 2. **Configure tickers and indicators**
-   - In `config.json` add the configuration parameters.
-   - In `tickers.json` add the stock symbols to analyze, one per line.
-   - In `strategies.csv` lists the stocks to generate trading signals, each with its corresponding best strategy.
+   - In `config/config.json` add the configuration parameters.
+   - In `config/tickers.json` add the stock symbols to analyze, one per line.
 
-3. **Configure Telegram**
-   - Create a Telegram bot and obtain its `TOKEN`.
-   - Create a Telegram channel and obtain its `CHAT_ID`.
-   - Add the bot as channel administrator.
-
-4. **Run the script**
+3. **Run the script**
    - To run the optimization with backtests, execute:
      ```bash
      python trading_strategy_optimizer.py
      ```
-   - To generate recurrent trading signals and notifications for each ticker, execute:
-     ```bash
-     python trading_strategy_bot.py
-     ```
-   - To automate the signal generation with GitHub Actions, create the repository secrets `TOKEN` and `CHAT_ID` for the preconfigured workflow.
 
-## 🖼️ Output Examples
+## 🧩 Output Examples
 
 - **Backtest chart with SMA crossover**
   
@@ -116,23 +95,7 @@ The project currently supports the following indicators:
   
   Notice that the asset ends the evaluated periodo at 1.75 times its initial price, so a Buy & hold strategy would yield 175% return. On the other hand, strictly following the SMA 20/30 strategy would produce above 250% return over the same period, excluding any trasactions fees. Furthermore, short selling operations are ignored by default in calculations assuming there exist borrowing fees involved, though they can easily be enabled in the backtest.
 
-- **Trading signals via Telegram**
-
-  After running `trading_strategy_bot.py`, it generates trading signals for the selected (best) strategies, as the example below:
-  <p align="center">
-     <img width="480" height="511" alt="telegram" src="https://github.com/user-attachments/assets/39ac0ee0-c816-4bd6-8742-b4884156051a" />
-  </p>
-
-  Notice that a trading signal is generated for each asset, suggesting an up, down or neutral tendency based on the selected strategy and this trend duration, showing how many samples its side remained unchanged. Additionaly, volume and confirmation moving average crossover data are displayed as strenght indicators for such trends.
   
-## 🧩 Project Structure
-
-- `trading_strategy_optimizer.py` → Main file for backtesting and search for the best strategies.
-- `trading_strategy_bot.py` → Main file for generating recurrent trading signals and Telegram notifications.
-- `tickers.json` → List of tickers to analyze.
-- `indicators.json` → List of indicators to test.
-- `strategies.csv` → List of selected strategies for trading signals, including tickers and their indicators.
-
 ## 📌 Notes
 
 ⚠️ We are not responsible for any financial losses resulting from the use of the strategies or signals generated by this code.
@@ -142,8 +105,7 @@ The project currently supports the following indicators:
   - migration to object-oriented programming (OOP); ✅
   - improve objective function with new weights and presets; ✅
   - improve optimization techniques;
-  - file saving in cloud;
-  - e-mail alerts/reports.
+  - file saving in cloud.
 
 ## 🤝 Support
 
@@ -151,4 +113,4 @@ This repository is independently maintained, only in free time. If you find the 
 
 - [PayPal](https://www.paypal.com/donate/?hosted_button_id=BF6E8J7P32KWE)  
 
-Your support helps keep the project alive and evolving, by adding new indicators, improvements, and documentation.
+Your support helps keep the project alive and evolving, by adding new optimization methods, improvements and documentation.

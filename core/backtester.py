@@ -1,6 +1,4 @@
-import json, matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+import json
 
 
 # =====================================================
@@ -45,7 +43,7 @@ class Backtester:
 
             # simulate execution (backtest)
             df["Position"] = df["Signal"].shift(1)                      # simulate position (using previous sample)
-            df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations  
+            # df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations  
             df["Trade"] = df["Position"].diff().abs()                   # simulate trade
             df["Entry_Price"] = df["Close"].where(df["Trade"] == 1)     # entry price
             df["Entry_Price"] = df["Entry_Price"].ffill()
@@ -69,64 +67,3 @@ class Backtester:
         except Exception as err:
             raise RuntimeError(f"Error in backtest run_strategy: {err}") from err
         return df
-
-    def plot_price(self, axis, ticker):
-        axis.plot(self.df.index, self.df["Close"], label=ticker)
-        axis.grid(True)
-    
-    def plot_ma(self, axis, ind_t, params):
-        if "Short" in self.df and len(params) >= 1:
-            axis.plot(self.df.index, self.df["Short"], label=f"{ind_t}{params[0]}")
-        if "Long" in self.df and len(params) == 2:
-            axis.plot(self.df.index, self.df["Long"], label=f"{ind_t}{params[1]}")
-        if "Long" in self.df and len(params) >= 3:
-            axis.plot(self.df.index, self.df["Long"], label=f"{ind_t}{params[1]}")
-        if "Med" in self.df and len(params) >= 3:
-             axis.plot(self.df.index, self.df["Mid"], label=f"{ind_t}{params[2]}")
-    
-    def plot_bb(self, axis, params):
-        axis.plot(self.df.index, self.df["BB_Mid"], label=f"BB mean {params[0]}")
-        axis.plot(self.df.index, self.df["BB_Upper"], color='r', label=f"BB std {params[1]}")
-        axis.plot(self.df.index, self.df["BB_Lower"], color='r')
-        
-    def plot_macd(self, axis):
-        axis.plot(self.df.index, self.df["MACD"], label="MACD")
-        axis.plot(self.df.index, self.df["MACD_Signal"], label="MACD_Signal")
-        axis.bar(self.df.index, self.df["MACD_Histogram"], color='r', label="Histogram", alpha=0.4)
-        axis.axhline(0, linewidth=1)
-        axis.grid(True)
-
-    def plot_res(self, label):
-        ticker, ind_t, *params = label.split("_")
-
-        # plot price and indicator
-        if ind_t in ["SMA", "EMA", "WMA"]:
-            fig, axis = plt.subplots(figsize=(12,6))
-            self.plot_price(axis, ticker)
-            self.plot_ma(axis, ind_t, params)
-            axis.legend()
-            axis.set_title(f"{ticker} - Price")
-        elif ind_t == "BB":
-            fig, axis = plt.subplots(figsize=(12,6))
-            self.plot_price(axis, ticker)
-            self.plot_bb(axis, params)
-            axis.legend()
-            axis.set_title(f"{ticker} - Price")
-        elif ind_t == "MACD":
-            fig, (axis_price, axis_macd) = plt.subplots(2, 1, figsize=(12,8), sharex=True, gridspec_kw={"height_ratios": [3, 1]})
-            self.plot_price(axis_price, ticker)
-            axis_price.set_title(f"{ticker} - Price")
-            self.plot_macd(axis_macd)
-        plt.tight_layout()
-        plt.savefig(f"data/results/{label}.png", dpi=300, bbox_inches="tight")
-        plt.close()
-        
-        # plot returns
-        plt.figure(figsize=(12,6))
-        plt.plot(self.df.index, self.df["Cumulative_Market"], label="Buy & Hold")
-        plt.plot(self.df.index, self.df["Cumulative_Strategy"], label="Strategy")
-        plt.title(f"{ticker} - Backtest {ind_t}{'/'.join(params)}")
-        plt.legend()
-        plt.grid(True)
-        plt.savefig(f"data/results/{label}_backtest.png", dpi=300, bbox_inches="tight")
-        plt.close()
