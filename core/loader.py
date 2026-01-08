@@ -1,4 +1,4 @@
-import json
+import os, json
 import yfinance as yf
 from datetime import datetime
 
@@ -10,8 +10,10 @@ class Loader:
     def __init__(self, file_config="config/config.json", file_tickers=None, file_indicators=None):
         self.file_tickers = file_tickers
         self.file_config  = file_config
+        self.folder       = "data/results"
         self.load_config(file_config)
-           
+        self.clear_folder()
+        
     def load_config(self, path):
         with open(path, "r", encoding="utf-8") as f:
             config = json.load(f)
@@ -76,3 +78,8 @@ class Loader:
         df.columns = df.columns.droplevel(1)    
         df = df[["Close", "Volume"]]
         return df
+    
+    def clear_folder(self):
+        for file in os.listdir(self.folder):
+            file_path = os.path.join(self.folder, file)
+            if os.path.isfile(file_path) and file != ".gitkeep": os.remove(file_path)

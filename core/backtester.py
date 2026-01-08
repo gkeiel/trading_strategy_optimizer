@@ -43,7 +43,7 @@ class Backtester:
 
             # simulate execution (backtest)
             df["Position"] = df["Signal"].shift(1)                      # simulate position (using previous sample)
-            # df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations  
+            df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations  
             df["Trade"] = df["Position"].diff().abs()                   # simulate trade
             df["Entry_Price"] = df["Close"].where(df["Trade"] == 1)     # entry price
             df["Entry_Price"] = df["Entry_Price"].ffill()

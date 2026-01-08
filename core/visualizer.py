@@ -1,21 +1,16 @@
-import os, matplotlib
+import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 
 # =====================================================
 #  Visualizer
 # =====================================================
 class Visualizer:
-    def __init__(self, df, folder="data/results"):
+    def __init__(self, df):
         self.df     = df
-        self.folder = folder
-        
-    def clear_folder(self):
-        for file in os.listdir(self.folder):
-            file_path = os.path.join(self.folder, file)
-            if os.path.isfile(file_path) and file != ".gitkeep": os.remove(file_path)
-                
+                        
     def plot_price(self, axis, ticker):
         axis.plot(self.df.index, self.df["Close"], label=ticker)
         axis.grid(True)

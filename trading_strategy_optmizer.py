@@ -17,7 +17,6 @@ def main():
     raw_data = {}
     pro_data = {}
     res_data = {}
-    Visualizer(0).clear_folder()
     
     try:
         # download data and run optimization (for each ticker and indicator)
@@ -45,7 +44,6 @@ def main():
                 ind_p  = indicator["ind_p"]  # indicator parameters
                 params = "_".join(str(p) for p in ind_p)
                 label  = f"{ticker}_{ind_t}_{params}"
-        
                 pro_data[ticker][label] = df.copy()
                 res_data[ticker][label] = {
                     "Indicator": ind_t,
@@ -81,7 +79,7 @@ def main():
 if __name__ == "__main__":
     max_attempt = 3
     
-    for attempt in range(1, max_attempt+1):
+    for attempt in range(max_attempt):
         try:
             print(f"Attempt {attempt} of {max_attempt}.")
             main()

@@ -20,12 +20,6 @@ class Strategies:
         "agressive": {"w_return": 1.0, "w_trades": 0, "w_sharpe": 0.02, "w_drdown": 0},
         "defensive": {"w_return": 1.0, "w_trades": 0.05, "w_sharpe": 0, "w_drdown": 0.05},
     }
-            
-    def load_config(self, path):
-        with open(path, "r", encoding="utf-8") as f:
-            config = json.load(f)
-            cfg    = config.get("backtest", {})
-        self.preset = cfg.get("preset", "basic")
                
     def compute_score(self, metrics: dict, **weights) -> float:
         """
@@ -40,9 +34,7 @@ class Strategies:
     
     def best_strategy(self, res_data, **weights):
         """
-        Manages scoring presets for strategy in a deterministic grid evaluation:
-        tests objective function for all strategies and ranks them using
-        weighted scores defined by each preset
+        Manages weighted score for strategies
         """
         bst_data = {}
 

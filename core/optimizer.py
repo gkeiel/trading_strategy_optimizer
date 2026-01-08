@@ -1,18 +1,24 @@
 from .indicator import Indicator
 from .backtester import Backtester
 from .strategies import Strategies
-import math, random, copy
+import json, math, random, copy
 
 
 # =====================================================
 #  Optimizer
 # =====================================================
 class Optimizer:
-    def __init__(self, df, search_space):
+    def __init__(self, df, search_space, file_config="config/config.json"):
         self.df       = df
         self.space    = search_space
         self.data     = []
         self.data_opt = []
+        self.load_config(file_config)
+        
+    def load_config(self, path):
+        with open(path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+            self.method = config.get("method", "simulated_annealing")
 
     def evaluate(self, indicator):
         df = self.df.copy()
@@ -41,16 +47,14 @@ class Optimizer:
         return score, df, metrics
     
     def search(self):
-        start_indicator = {
-            "ind_t": self.space["ind_t"],
-            "ind_p": [
-                int((p["min"] +p["max"])/2)
-                for p in self.space["params"]
-            ]
-        }
-        
+        start_indicator = {"ind_t": self.space["ind_t"], "ind_p": [int((p["min"] +p["max"])/2) for p in self.space["params"]]}
         self.log   = open(f"data/results/{start_indicator['ind_t']}_log.txt", "w")
-        best_params, best_score = self.simulated_annealing(start_indicator=start_indicator)
+        
+        if self.method == "simulated_annealing":  
+            best_params, best_score = self.simulated_annealing(start_indicator=start_indicator)
+        elif self.method == "hill_climbing":
+            best_params, best_score = self.hill_climbing(start_indicator=start_indicator)
+
         self.log.close()
         return self.data
     
@@ -60,7 +64,7 @@ class Optimizer:
         for i, val in enumerate(x["ind_p"]):
             pmin  = self.space["params"][i]["min"]
             pmax  = self.space["params"][i]["max"]
-            step  = max(1, round(alpha*(pmax -pmin)/5))
+            step  = max(1, round(alpha*(pmax -pmin)/4))
             new_v = val +random.randint(-step, step)
             x["ind_p"][i] = max(pmin, min(pmax, new_v))
                     
@@ -75,7 +79,7 @@ class Optimizer:
 
         return x
 
-    def hill_climbing(self, start_indicator, alpha=1, n=2, k_max=60):
+    def hill_climbing(self, start_indicator, alpha=1, n=3, k_max=50):
         x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
         k         = 0
@@ -93,7 +97,7 @@ class Optimizer:
 
         return x_i, f_i
     
-    def simulated_annealing(self, start_indicator, alpha=1, beta=0.95, n=2, k_max=60):
+    def simulated_annealing(self, start_indicator, alpha=1, beta=0.95, n=3, k_max=50):
         x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
         T         = 1

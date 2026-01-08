@@ -2,6 +2,7 @@
   "start": "2024-01-01",
   "market": "US",
   "preset": "basic",
+  "method": "simulated_annealing",
 
   "optimize": [
     {
@@ -12,10 +13,10 @@
       ]
     },
     {
-      "ind_t": "BB",
+      "ind_t": "EMA",
       "params": [
-        {"name": "window", "min": 10, "max": 60},
-        {"name": "std",    "min": 2,  "max": 4}
+        {"name": "short", "min": 5,  "max": 30},
+        {"name": "long", "min": 30, "max": 100}
       ]
     },
     {
