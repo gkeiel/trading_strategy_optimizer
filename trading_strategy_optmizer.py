@@ -54,7 +54,7 @@ def main():
                 visualizer = Visualizer(df)
                 visualizer.plot_results(label)
             
-            visualizer.plot_optimization(optimization.data_opt, label)
+            visualizer.plot_optimization(optimization.opt_global, optimization.opt_local, label)
 
 
         # compute best strategies (for each ticker)

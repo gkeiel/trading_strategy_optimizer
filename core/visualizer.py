@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pandas as pd
 
 
 # =====================================================
@@ -73,12 +74,12 @@ class Visualizer:
         plt.savefig(f"data/results/{label}_backtest.png", dpi=300, bbox_inches="tight")
         plt.close()
         
-    def plot_optimization(self, data_opt, label):
+    def plot_optimization(self, opt_global, opt_local, label):
         ticker, ind_t, *params = label.split("_")
-        k     = [d["k"] for d in data_opt]
-        score = [d["score"] for d in data_opt]
-        T     = [d["T"] for d in data_opt]
-        alpha = [d["alpha"] for d in data_opt]
+        k     = [d["k"] for d in opt_global]
+        score = [d["score"] for d in opt_global]
+        T     = [d["T"] for d in opt_global]
+        alpha = [d["alpha"] for d in opt_global]
         fig, axes = plt.subplots(2, 2, figsize=(12, 12))
         
         # optimization convergence
@@ -102,23 +103,27 @@ class Visualizer:
         axes[1,0].set_title(f"{ticker} - Step size decay {ind_t}")
         axes[1,0].grid(True)
         
-        # heatmap
-        # k_vals = sorted(set(k))
-        # T_vals = sorted(set(T))
-        # matrix = []
-        # for T in T_vals:
-        #     row = []
-            
-        #     for k in k_vals:
-        #         matching = [d["score"] for d in data_opt if d["k"]==k and d["T"]==T]
-        #         row.append(matching[0] if matching else 0)
-        #     matrix.append(row)
-            
-        # sns.heatmap(matrix, annot=True, fmt=".2f", cmap="YlGnBu")
-        # axes[1,1].set_xlabel("Iteration")
-        # axes[1,1].set_ylabel("Temperature")
-        # axes[1,1].set_title(f"{ticker} - Score heatmap {ind_t}")
-
-        plt.tight_layout()
+        # parameter space
+        p1    = [d["params"][0] for d in opt_local]
+        p2    = [d["params"][1] for d in opt_local]
+        score = [d["score"] for d in opt_local]
+        sc    = axes[1,1].scatter(p1, p2, c=score, cmap="viridis")
+        fig.colorbar(sc, ax=axes[1,1], label="Score")
+        axes[1,1].set_xlabel("x_1")
+        axes[1,1].set_ylabel("x_2")
+        axes[1,1].set_title("Space exploration")
+        axes[1,1].grid(True)
+        
+        #plt.tight_layout()
         plt.savefig(f"data/results/{ticker}_{ind_t}_optimization.png", dpi=300)
+        plt.close()
+        
+        # heatmap
+        plt.figure(figsize=(12,6))
+        plt.hexbin(p1, p2, C=score, gridsize=10, reduce_C_function=max, cmap="viridis")
+        plt.colorbar(label="Score")
+        plt.xlabel("x_1")
+        plt.ylabel("x_2")
+        plt.title(f"{ticker} - Score heatmap {ind_t}")
+        plt.savefig(f"data/results/{ticker}_{ind_t}_optimization_heatmap.png", dpi=300)
         plt.close()

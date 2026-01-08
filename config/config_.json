@@ -4,12 +4,21 @@
   "preset": "basic",
   "method": "simulated_annealing",
 
-  "SA": {
-    "n":    5,
-    "k_max":50
-  },
-
   "optimize": [
+    {
+      "ind_t": "SMA",
+      "params": [
+        {"name": "short", "min": 5,  "max": 30},
+        {"name": "long", "min": 30, "max": 100}
+      ]
+    },
+    {
+      "ind_t": "EMA",
+      "params": [
+        {"name": "short", "min": 5,  "max": 30},
+        {"name": "long", "min": 30, "max": 100}
+      ]
+    },
     {
       "ind_t": "MACD",
       "params": [

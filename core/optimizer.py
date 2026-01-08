@@ -9,17 +9,20 @@ import json, math, random, copy
 # =====================================================
 class Optimizer:
     def __init__(self, df, search_space, file_config="config/config.json"):
-        self.df       = df
-        self.space    = search_space
-        self.data     = []
-        self.data_opt = []
+        self.df         = df
+        self.space      = search_space
+        self.data       = []
+        self.opt_local  = []
+        self.opt_global = []
         self.load_config(file_config)
         
     def load_config(self, path):
         with open(path, "r", encoding="utf-8") as f:
             config = json.load(f)
-            self.method = config.get("method", "simulated_annealing")
-
+            
+        self.method = config.get("method", "simulated_annealing")
+        self.sa_cfg = config.get("SA", {})
+        
     def evaluate(self, indicator):
         df = self.df.copy()
         
@@ -47,7 +50,7 @@ class Optimizer:
         return score, df, metrics
     
     def search(self):
-        start_indicator = {"ind_t": self.space["ind_t"], "ind_p": [int((p["min"] +p["max"])/2) for p in self.space["params"]]}
+        start_indicator = {"ind_t": self.space["ind_t"], "ind_p": [p["min"] for p in self.space["params"]]}
         self.log   = open(f"data/results/{start_indicator['ind_t']}_log.txt", "w")
         
         if self.method == "simulated_annealing":  
@@ -79,7 +82,7 @@ class Optimizer:
 
         return x
 
-    def hill_climbing(self, start_indicator, alpha=1, n=3, k_max=50):
+    def hill_climbing(self, start_indicator, alpha=1, n=5, k_max=50):
         x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
         k         = 0
@@ -90,14 +93,18 @@ class Optimizer:
             for _ in range(n):
                 x_j       = self.random_neighbor(x_i, alpha)
                 f_j, _, _ = self.evaluate(x_j)
-
+                self.opt_local.append({"k": k, "score": f_i, "alpha": alpha, "params": x_j["ind_p"].copy()})
+                
                 if f_j > f_i:
                     x_i = x_j
                     f_i = f_j
 
         return x_i, f_i
     
-    def simulated_annealing(self, start_indicator, alpha=1, beta=0.95, n=3, k_max=50):
+    def simulated_annealing(self, start_indicator, alpha=1, beta_alpha=0.9, beta=0.95):
+        n         = self.sa_cfg.get("n", 3)
+        k_max     = self.sa_cfg.get("k_max", 50)
+        
         x_i       = start_indicator
         f_i, _, _ = self.evaluate(x_i)
         T         = 1
@@ -109,6 +116,7 @@ class Optimizer:
             for _ in range(n):
                 x_j       = self.random_neighbor(x_i, alpha)
                 f_j, _, _ = self.evaluate(x_j)
+                self.opt_local.append({"k": k, "score": f_j, "T": T, "alpha": alpha, "params": x_j["ind_p"].copy()})
 
                 if f_j > f_i:
                     x_i = x_j
@@ -120,9 +128,9 @@ class Optimizer:
                         f_i = f_j
             
             T     = beta*T
-            alpha = alpha*beta
+            alpha = beta_alpha*alpha
+            self.opt_global.append({"k": k, "score": f_i, "T": T, "alpha": alpha})
             self.log.write(f"k = {k}: x = {x_i} | f(x) = {f_i:.4f} | T = {T:.2f} | alpha = {alpha:.2f}\n")
-            self.data_opt.append({"k": k, "score": f_i, "T": T, "alpha": alpha})
-            
+
         self.log.flush()
         return x_i, f_i
