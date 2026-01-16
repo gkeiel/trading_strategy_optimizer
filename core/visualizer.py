@@ -1,8 +1,8 @@
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
+from matplotlib.gridspec import GridSpec
+#from mpl_toolkits.mplot3d import Axes3D
 
 
 # =====================================================
@@ -13,7 +13,7 @@ class Visualizer:
         self.df     = df
                         
     def plot_price(self, axis, ticker):
-        axis.plot(self.df.index, self.df["Close"], label=ticker)
+        axis.plot(self.df.index, self.df["Close"], label="Price")
         axis.grid(True)
     
     def plot_ma(self, axis, ind_t, params):
@@ -40,90 +40,126 @@ class Visualizer:
 
     def plot_results(self, label):
         ticker, ind_t, *params = label.split("_")
-
+        
+        # instance figure with subplots
+        if ind_t == "MACD":
+            fig, (axis_price, axis_macd, axis_ret) = plt.subplots(3, 1, figsize=(20, 12), gridspec_kw={"height_ratios": [3, 1, 1]}, sharex=True)
+        else:
+            fig, (axis_price, axis_ret) = plt.subplots(2, 1, figsize=(20, 12), gridspec_kw={"height_ratios": [3, 1]}, sharex=True)
+        fig.suptitle(f"{ticker} - Backtest {ind_t} ({','.join(params)})")
+        self.plot_price(axis_price, ticker)
+        axis_price.set_ylabel("Price")
+               
         # plot price and indicator
         if ind_t in ["SMA", "EMA", "WMA"]:
-            fig, axis = plt.subplots(figsize=(12,6))
-            self.plot_price(axis, ticker)
-            self.plot_ma(axis, ind_t, params)
-            axis.set_title(f"{ticker} - Price")
-            axis.legend()
+            self.plot_ma(axis_price, ind_t, params)
         elif ind_t == "BB":
-            fig, axis = plt.subplots(figsize=(12,6))
-            self.plot_price(axis, ticker)
-            self.plot_bb(axis, params)
-            axis.set_title(f"{ticker} - Price")
-            axis.legend()
+            self.plot_bb(axis_price, params)
         elif ind_t == "MACD":
-            fig, (axis_price, axis_macd) = plt.subplots(2, 1, figsize=(12,8), sharex=True, gridspec_kw={"height_ratios": [3, 1]})
-            self.plot_price(axis_price, ticker)
-            axis_price.set_title(f"{ticker} - Price")
             self.plot_macd(axis_macd)
-        plt.tight_layout()
-        plt.savefig(f"data/results/{label}.png", dpi=300, bbox_inches="tight")
-        plt.close()
+            axis_macd.set_ylabel("MACD")
+            axis_macd.grid(True)
+        if "Trade" in self.df.columns:
+            entries = self.df[self.df["Trade"] == 1]
+            exits   = self.df[self.df["Trade"] == -1]
+            axis_price.scatter(entries.index, entries["Close"], marker="^", s=60, color="green", label="Buy")
+            axis_price.scatter(exits.index, exits["Close"], marker="v", s=60, color="green", label="Sell")
+        axis_price.legend()
+        axis_price.grid(True)
         
         # plot returns
-        plt.figure(figsize=(12,6))
-        plt.plot(self.df.index, self.df["Cumulative_Market"], label="Buy & Hold")
-        plt.plot(self.df.index, self.df["Cumulative_Strategy"], label="Strategy")
-        plt.title(f"{ticker} - Backtest {ind_t} {'/'.join(params)}")
-        plt.ylabel("Return")
-        plt.legend()
-        plt.grid(True)
+        axis_ret.plot(self.df.index, self.df["Cumulative_Market"], label="Buy & Hold")
+        axis_ret.plot(self.df.index, self.df["Cumulative_Strategy"], label="Strategy")
+        axis_ret.set_ylabel("Return")
+        axis_ret.legend()
+        axis_ret.grid(True)
+        plt.tight_layout()
         plt.savefig(f"data/results/{label}_backtest.png", dpi=300, bbox_inches="tight")
-        plt.close()
+        plt.close()               
         
     def plot_optimization(self, opt_global, opt_local, label):
         ticker, ind_t, *params = label.split("_")
         k     = [d["k"] for d in opt_global]
         score = [d["score"] for d in opt_global]
-        T     = [d["T"] for d in opt_global]
-        alpha = [d["alpha"] for d in opt_global]
-        fig, axes = plt.subplots(2, 2, figsize=(12, 12))
+        T     = [d.get("T") for d in opt_global]
+        alpha = [d.get("alpha") for d in opt_global]
         
+        n_params    = len(opt_global[0]["params"])
+        P           = list(zip(*[d["params"] for d in opt_global]))
+        if n_params == 2:
+            planes = [(0, 1)]
+        else:
+            planes = [(i, j) for i in range(n_params) for j in range(i+1, n_params)]
+        fig = plt.figure(figsize=(20, 12))
+        gs  = GridSpec(1 +(len(planes)+1)//2, 2, figure=fig)
+        axes = []
+        axes.append(fig.add_subplot(gs[0, 0]))
+        axes.append(fig.add_subplot(gs[0, 1]))  
+              
         # optimization convergence
-        axes[0,0].plot(k, score, color='tab:blue')
-        axes[0,0].set_xlabel("Iteration")
-        axes[0,0].set_ylabel("Score")
-        axes[0,0].set_title(f"{ticker} - Optimization convergence {ind_t}")
-        axes[0,0].grid(True)
+        axes[0].plot(k, score, color='tab:blue')
+        axes[0].set_xlabel("Iteration")
+        axes[0].set_ylabel("Score")
+        axes[0].set_title(f"{ticker} - Optimization convergence {ind_t}")
+        axes[0].grid(True)
 
-        # temperature evolution
-        axes[0,1].plot(k, T, color='tab:orange')
-        axes[0,1].set_xlabel("Iteration")
-        axes[0,1].set_ylabel("Temperature")
-        axes[0,1].set_title(f"{ticker} - Temperature decay {ind_t}")
-        axes[0,1].grid(True)
-        
         # alpha evolution
-        axes[1,0].plot(k, alpha, color='tab:green')
-        axes[1,0].set_xlabel("Iteration")
-        axes[1,0].set_ylabel("Step size")
-        axes[1,0].set_title(f"{ticker} - Step size decay {ind_t}")
-        axes[1,0].grid(True)
-        
-        # parameter space
-        p1    = [d["params"][0] for d in opt_local]
-        p2    = [d["params"][1] for d in opt_local]
-        score = [d["score"] for d in opt_local]
-        sc    = axes[1,1].scatter(p1, p2, c=score, cmap="viridis")
-        fig.colorbar(sc, ax=axes[1,1], label="Score")
-        axes[1,1].set_xlabel("x_1")
-        axes[1,1].set_ylabel("x_2")
-        axes[1,1].set_title("Space exploration")
-        axes[1,1].grid(True)
-        
-        #plt.tight_layout()
+        axes[1].plot(k, alpha, label=r"$\alpha$", color='tab:green')
+        if any(T_i is not None for T_i in T):
+            # temperature evolution
+            axes[1].plot(k, T, label="T", color='tab:orange')
+        axes[1].set_xlabel("Iteration")
+        axes[1].set_ylabel("Value")
+        axes[1].set_title(f"{ticker} - Parameters evolution {ind_t}")
+        axes[1].legend()
+        axes[1].grid(True)
+
+        # heatmap            
+        axes_heat = []
+        for idx, (i, j) in enumerate(planes):
+            ax = fig.add_subplot(gs[1+idx//2, idx%2])
+            axes_heat.append(ax)
+            
+            p1 = P[i]
+            p2 = P[j]
+            sc = ax.hexbin(p1, p2, C=score, gridsize=10, reduce_C_function=max, cmap="viridis")
+            ax.set_xlabel(f"x_{i+1}")
+            ax.set_ylabel(f"x_{j+1}")
+            ax.set_title(f"{ticker} - Score heatmap {ind_t} (x{i+1}, x{j+1})")
+            
+        fig.colorbar(sc, ax=axes_heat, label="Score")
         plt.savefig(f"data/results/{ticker}_{ind_t}_optimization.png", dpi=300)
         plt.close()
         
-        # heatmap
-        plt.figure(figsize=(12,6))
-        plt.hexbin(p1, p2, C=score, gridsize=10, reduce_C_function=max, cmap="viridis")
-        plt.colorbar(label="Score")
-        plt.xlabel("x_1")
-        plt.ylabel("x_2")
-        plt.title(f"{ticker} - Score heatmap {ind_t}")
-        plt.savefig(f"data/results/{ticker}_{ind_t}_optimization_heatmap.png", dpi=300)
+        # optimization space
+        score_local = [d["score"] for d in opt_local]
+        if n_params == 2:
+            fig, axis = plt.subplots(figsize=(20, 12))
+            p1    = [d["params"][0] for d in opt_local]
+            p2    = [d["params"][1] for d in opt_local]
+            sc    = axis.scatter(p1, p2, c=score_local, cmap="viridis")
+            
+            axis.set_xlabel("x₁")
+            axis.set_ylabel("x₂")
+            axis.set_title("Space exploration")
+            axis.grid(True)
+            fig.colorbar(sc, ax=axis, label="Score")
+            
+        elif n_params >= 3:
+            fig, axis = plt.subplots(figsize=(20, 12))
+            ax3d = fig.add_subplot(111, projection="3d")
+            ax3d.set_box_aspect((1, 1, 0.8))
+            ax3d.view_init(elev=20, azim=45)
+            p1 = [d["params"][0] for d in opt_local]
+            p2 = [d["params"][1] for d in opt_local]
+            p3 = [d["params"][2] for d in opt_local]
+            sc = ax3d.scatter(p1, p2, p3, c=score_local, cmap="viridis")
+            
+            ax3d.set_xlabel("x₁")
+            ax3d.set_ylabel("x₂")
+            ax3d.set_zlabel("x₃")
+            ax3d.set_title("Space exploration")
+            fig.colorbar(sc, ax=ax3d, label="Score")        
+        
+        plt.savefig(f"data/results/{ticker}_{ind_t}_optimization_space.png", dpi=300)
         plt.close()

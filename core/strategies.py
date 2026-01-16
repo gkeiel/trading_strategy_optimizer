@@ -12,20 +12,28 @@ class Strategies:
     def load_config(self, path):
         with open(path, "r", encoding="utf-8") as f:
             config = json.load(f)
-            self.preset = config.get("preset", "basic")
+            self.preset  = config.get("preset", "basic")
+            self.weights = config.get("weights", {}) 
+            
+    def get_weights(self, **override):
+        base = self.PRESET.get(self.preset, {}).copy()
+        if self.preset == "custom": base.update(self.weights)
+        base.update(override)
+        return base
             
     PRESET = {
         "basic":     {"w_return": 1.0, "w_trades": 0.02, "w_sharpe": 0, "w_drdown": 0},
         "balanced":  {"w_return": 1.0, "w_trades": 0.04, "w_sharpe": 0.01, "w_drdown": 0.05},
         "agressive": {"w_return": 1.0, "w_trades": 0, "w_sharpe": 0.02, "w_drdown": 0},
         "defensive": {"w_return": 1.0, "w_trades": 0.05, "w_sharpe": 0, "w_drdown": 0.05},
+        "custom":    {}
     }
                
     def compute_score(self, metrics: dict, **weights) -> float:
         """
         Computes strategy score for a single evaluation
         """
-        params   = {**self.PRESET[self.preset], **weights}
+        params   = {**self.PRESET.get(self.preset, {}),**(self.weights if self.preset == "custom" else {}),**weights}
         w_return = params["w_return"]
         w_trades = params["w_trades"]
         w_sharpe = params["w_sharpe"]
@@ -38,7 +46,7 @@ class Strategies:
         """
         bst_data = {}
 
-        params   = {**self.PRESET[self.preset], **weights}
+        params   = {**self.PRESET.get(self.preset, {}),**(self.weights if self.preset == "custom" else {}),**weights}
         w_return = params["w_return"]
         w_trades = params["w_trades"]
         w_sharpe = params["w_sharpe"]

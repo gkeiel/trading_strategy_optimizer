@@ -1,12 +1,25 @@
 {
-  "start": "2024-01-01",
+  "start": "2025-01-01",
   "market": "US",
   "preset": "basic",
-  "method": "simulated_annealing",
+  "weights": {
+    "w_return": 1.0,
+    "w_trades": 0.02,
+    "w_sharpe": 0,
+    "w_drdown": 0
+  },
 
+  "method": "grid_search",
   "SA": {
     "n":    5,
     "k_max":50
+  },
+  "HC": {
+    "n":    5,
+    "k_max":50
+  },
+  "GS": {
+    "alpha": 2
   },
 
   "optimize": [
@@ -14,7 +27,7 @@
       "ind_t": "MACD",
       "params": [
         {"name": "fast",   "min": 5,  "max": 20},
-        {"name": "slow",   "min": 20, "max": 60},
+        {"name": "slow",   "min": 20, "max": 90},
         {"name": "signal", "min": 5,  "max": 15}
       ]
     }

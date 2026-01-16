@@ -4,5 +4,6 @@ __pycache__/
 
 data/debug/*
 data/results/*
+data/best_results/
 !data/debug/.gitkeep
 !data/results/.gitkeep
