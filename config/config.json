@@ -1,5 +1,5 @@
 {
-  "start": "2025-01-01",
+  "start": "2024-01-01",
   "market": "US",
   "preset": "basic",
   "weights": {
@@ -9,9 +9,9 @@
     "w_drdown": 0
   },
 
-  "method": "grid_search",
+  "method": "simulated_annealing",
   "SA": {
-    "n":    5,
+    "n":    3,
     "k_max":50
   },
   "HC": {
@@ -19,7 +19,7 @@
     "k_max":50
   },
   "GS": {
-    "alpha": 2
+    "alpha": 5
   },
 
   "optimize": [

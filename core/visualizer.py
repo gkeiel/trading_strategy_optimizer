@@ -127,7 +127,8 @@ class Visualizer:
             ax.set_ylabel(f"x_{j+1}")
             ax.set_title(f"{ticker} - Score heatmap {ind_t} (x{i+1}, x{j+1})")
             
-        fig.colorbar(sc, ax=axes_heat, label="Score")
+        fig.colorbar(sc, ax=axes_heat, fraction=0.03, pad=0.04, label="Score")
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
         plt.savefig(f"data/results/{ticker}_{ind_t}_optimization.png", dpi=300)
         plt.close()
         
@@ -145,8 +146,8 @@ class Visualizer:
             axis.grid(True)
             fig.colorbar(sc, ax=axis, label="Score")
             
-        elif n_params >= 3:
-            fig, axis = plt.subplots(figsize=(20, 12))
+        elif n_params == 3:
+            fig = plt.figure(figsize=(20, 12))
             ax3d = fig.add_subplot(111, projection="3d")
             ax3d.set_box_aspect((1, 1, 0.8))
             ax3d.view_init(elev=20, azim=45)
@@ -159,7 +160,10 @@ class Visualizer:
             ax3d.set_ylabel("x₂")
             ax3d.set_zlabel("x₃")
             ax3d.set_title("Space exploration")
-            fig.colorbar(sc, ax=ax3d, label="Score")        
-        
+            fig.colorbar(sc, ax=ax3d, fraction=0.02, pad=0.02, label="Score")  
+            
+        else:
+            fig = plt.figure(figsize=(20, 12))
+                 
         plt.savefig(f"data/results/{ticker}_{ind_t}_optimization_space.png", dpi=300)
         plt.close()
