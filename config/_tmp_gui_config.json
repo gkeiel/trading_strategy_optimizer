@@ -8,18 +8,16 @@
         "w_sharpe": 0,
         "w_drdown": 0
     },
-    "simulated_annealing": {
-        "enabled": true,
+    "method": "simulated_annealing",
+    "SA": {
         "n": 5,
-        "k_max": 5
+        "k_max": 10
     },
-    "hill_climbing": {
-        "enabled": false,
+    "HC": {
         "n": 5,
         "k_max": 50
     },
-    "grid_search": {
-        "enabled": false,
+    "GS": {
         "alpha": 2
     },
     "optimize": [
@@ -43,8 +41,5 @@
                 }
             ]
         }
-    ],
-    "SA, enabled": true,
-    "HC, enabled": false,
-    "GS, enabled": false
+    ]
 }

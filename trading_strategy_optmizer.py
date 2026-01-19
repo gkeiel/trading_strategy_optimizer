@@ -7,7 +7,12 @@ from core.exporter import Exporter
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-def main():
+def run_tso(on_log=None):
+        
+    def log(msg):
+        if on_log: on_log(msg)
+        else: print(msg)
+        
     # import configuration files
     loader       = Loader("config/config.json", "config/tickers.json")
     tickers      = loader.load_tickers()
@@ -24,10 +29,12 @@ def main():
 
             # download data (only once)
             if ticker not in raw_data:
+                log(f"Downloading data for {ticker}.")
                 raw_data[ticker] = loader.download_data(ticker)
             df = raw_data[ticker].copy()
             
             # run optimization
+            log(f"Optimizing for {ticker}.")
             optimization = Optimizer(df, indicators_space)
             step_data    = optimization.search()
             
@@ -58,6 +65,7 @@ def main():
 
 
         # compute best strategies (for each ticker)
+        log("Consolidating results.")
         bst_data = Strategies().best_strategy(res_data)
 
         # export dataframe for analysis
@@ -72,18 +80,22 @@ def main():
         
     except Exception as err:
         tb = traceback.format_exc()
-        print(f"Fatal error in main: {err}\n{tb}.")
-        sys.exit(1)
+        log(f"Error in main: {err}\n{tb}.")
+        raise
+    
+def main():
+    run_tso() 
 
 
 if __name__ == "__main__":
     max_attempt = 3
     
-    for attempt in range(max_attempt):
+    for attempt in range(1, max_attempt +1):
         try:
             print(f"Attempt {attempt} of {max_attempt}.")
             main()
             break
+        
         except Exception as err:
             print(f"Error on attempt {attempt}: {err}.")
             if attempt == max_attempt:

@@ -18,13 +18,10 @@ class Optimizer:
         self.load_config(file_config)
         
     def load_config(self, path):
-        with open(path, "r", encoding="utf-8") as f:
-            config = json.load(f)
-            
-        self.method = config.get("method", "simulated_annealing")
-        self.sa_cfg = config.get("SA", {})
-        self.hc_cfg = config.get("HC", {})
-        self.gs_cfg = config.get("GS", {})
+        with open(path, "r", encoding="utf-8") as f: config = json.load(f)
+        self.sa_cfg = config.get("simulated_annealing", {})
+        self.hc_cfg = config.get("hill_climbing", {})
+        self.gs_cfg = config.get("grid_search", {})
         
     def evaluate(self, indicator):
         indicator_key = (indicator["ind_t"], tuple(indicator["ind_p"]))
@@ -62,11 +59,11 @@ class Optimizer:
         start_indicator = {"ind_t": self.space["ind_t"], "ind_p": [p["min"] for p in self.space["params"]]}
         self.log   = open(f"data/results/{start_indicator['ind_t']}_log.txt", "w")
         
-        if self.method == "simulated_annealing":  
+        if self.sa_cfg.get("enabled"):  
             best_params, best_score = self.simulated_annealing(start_indicator=start_indicator)
-        elif self.method == "hill_climbing":
+        if self.hc_cfg.get("enabled"):
             best_params, best_score = self.hill_climbing(start_indicator=start_indicator)
-        elif self.method == "grid_search":
+        if self.gs_cfg.get("enabled"):
             best_params, best_score = self.grid_search(start_indicator=start_indicator)
         self.log.close()
         return self.data
