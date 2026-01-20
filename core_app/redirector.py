@@ -1,7 +1,4 @@
-import sys
-
-
-class StdoutRedirector:
+class Redirector:
     def __init__(self, write_func):
         self.write_func = write_func
 

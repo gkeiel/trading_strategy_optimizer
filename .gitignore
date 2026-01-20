@@ -1,9 +1,9 @@
 __pycache__/
 *.pyc
-.env
 
+core/__pycache__/
+core_app/__pycache__/
 data/debug/*
 data/results/*
-data/best_results/
 !data/debug/.gitkeep
 !data/results/.gitkeep

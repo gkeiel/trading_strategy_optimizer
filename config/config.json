@@ -10,8 +10,8 @@
     },
     "simulated_annealing": {
         "enabled": true,
-        "n": 5,
-        "k_max": 5
+        "n": 2,
+        "k_max": 1
     },
     "hill_climbing": {
         "enabled": false,
@@ -43,8 +43,5 @@
                 }
             ]
         }
-    ],
-    "SA, enabled": true,
-    "HC, enabled": false,
-    "GS, enabled": false
+    ]
 }

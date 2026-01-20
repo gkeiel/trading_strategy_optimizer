@@ -1,4 +1,4 @@
-import os, sys, traceback, itertools
+import os, traceback, itertools
 from core.loader import Loader
 from core.strategies import Strategies
 from core.optimizer import Optimizer
@@ -72,7 +72,7 @@ def run_tso(on_log=None):
         exporter = Exporter()
         exporter.export_dataframe(pro_data)
         
-        # export backtesting results sorted by best
+        # export backtesting results (sorted by best)
         exporter.export_best_results(bst_data)
 
         # update best strategies
