@@ -10,17 +10,19 @@
     },
     "simulated_annealing": {
         "enabled": true,
-        "n": 2,
-        "k_max": 1
+        "alpha": 1,
+        "N": 5,
+        "k_max": 60
     },
-    "hill_climbing": {
+    "genetic_algorithm": {
         "enabled": false,
-        "n": 5,
-        "k_max": 50
+        "alpha": 1,
+        "N": 5,
+        "k_max": 60
     },
     "grid_search": {
         "enabled": false,
-        "alpha": 2
+        "alpha": 1
     },
     "optimize": [
         {

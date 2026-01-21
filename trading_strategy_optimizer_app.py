@@ -27,7 +27,7 @@ def run_tso_app():
         print(f"Sharpe                    {float(results['Sharpe']):.2f}")
         print(f"Max Drawdown   {float(results['Max_Drawdown'])*100:.2f} %")
         print(f"Market return       {float(results['Return_Market'])*100:.2f} %")
-        print("=======================\n")
+        print("======================\n")
         
     def run_thread(config):
         with open("config/config.json", "w") as f: json.dump(config, f, indent=4)

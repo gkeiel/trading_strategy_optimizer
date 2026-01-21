@@ -38,7 +38,7 @@ class Gui(App):
         root.add_widget(btn)
            
         # log
-        self.log = TextInput(readonly=True, size_hint_y=0.7)
+        self.log = TextInput(readonly=True, size_hint_y=0.8)
         root.add_widget(self.log)
         
         return root
@@ -52,7 +52,7 @@ class Gui(App):
         col.add_widget(Label(text=section.upper(), size_hint_y=None, height=30, bold=True))
         
         # checkbox fields
-        if section in {"simulated_annealing", "hill_climbing", "grid_search"}:
+        if section in {"simulated_annealing", "genetic_algorithm", "grid_search"}:
             row = BoxLayout(size_hint_y=None, height=30, spacing=5)
             lbl = Label(text="enabled", size_hint_x=0.7)
             lbl.bind(size=lbl.setter("text_size"))

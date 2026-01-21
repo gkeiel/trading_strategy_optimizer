@@ -2,7 +2,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-#from mpl_toolkits.mplot3d import Axes3D
 
 
 # =====================================================
@@ -85,13 +84,12 @@ class Visualizer:
         alpha = [d.get("alpha") for d in opt_global]
         
         n_params    = len(opt_global[0]["params"])
-        P           = list(zip(*[d["params"] for d in opt_global]))
         if n_params == 2:
             planes = [(0, 1)]
         else:
             planes = [(i, j) for i in range(n_params) for j in range(i+1, n_params)]
-        fig = plt.figure(figsize=(20, 12))
-        gs  = GridSpec(1 +(len(planes)+1)//2, 2, figure=fig)
+        fig  = plt.figure(figsize=(20, 12))
+        gs   = GridSpec(1 +(len(planes)+1)//2, 2, figure=fig)
         axes = []
         axes.append(fig.add_subplot(gs[0, 0]))
         axes.append(fig.add_subplot(gs[0, 1]))  
@@ -114,7 +112,9 @@ class Visualizer:
         axes[1].legend()
         axes[1].grid(True)
 
-        # heatmap            
+        # heatmap
+        P           = list(zip(*[d["params"] for d in opt_local]))
+        score_local = [d["score"] for d in opt_local]
         axes_heat = []
         for idx, (i, j) in enumerate(planes):
             ax = fig.add_subplot(gs[1+idx//2, idx%2])
@@ -122,10 +122,10 @@ class Visualizer:
             
             p1 = P[i]
             p2 = P[j]
-            sc = ax.hexbin(p1, p2, C=score, gridsize=10, reduce_C_function=max, cmap="viridis")
+            sc = ax.hexbin(p1, p2, C=score_local, gridsize=10, reduce_C_function=max, cmap="viridis")
             ax.set_xlabel(f"x_{i+1}")
             ax.set_ylabel(f"x_{j+1}")
-            ax.set_title(f"{ticker} - Score heatmap {ind_t} (x{i+1}, x{j+1})")
+            ax.set_title(f"{ticker} - Score heatmap {ind_t} (x_{i+1}, x_{j+1})")
             
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         fig.colorbar(sc, ax=axes_heat, fraction=0.03, pad=0.04, label="Score")
@@ -133,7 +133,6 @@ class Visualizer:
         plt.close()
         
         # optimization space
-        score_local = [d["score"] for d in opt_local]
         if n_params == 2:
             fig, axis = plt.subplots(figsize=(12, 12))
             p1    = [d["params"][0] for d in opt_local]
@@ -156,9 +155,9 @@ class Visualizer:
             p3 = [d["params"][2] for d in opt_local]
             sc = ax3d.scatter(p1, p2, p3, c=score_local, cmap="viridis")
             
-            ax3d.set_xlabel("x₁")
-            ax3d.set_ylabel("x₂")
-            ax3d.set_zlabel("x₃")
+            ax3d.set_xlabel("x_1")
+            ax3d.set_ylabel("x_2")
+            ax3d.set_zlabel("x_3")
             ax3d.set_title("Space exploration")
             fig.colorbar(sc, ax=ax3d, fraction=0.03, pad=0.04, label="Score")  
             

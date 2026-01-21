@@ -3,7 +3,7 @@
 This project provides a Python script for **backtesting and heuristic optimization of trading strategies based on technical indicators**, being applied to spot market time series.
 
 As main advantages, the project provides:
-- **simulated annealing algorithm** to perform a global search for the best strategies. 
+- **simulated annealing, genetic and grid search algorithms** to perform a global search for the best strategies. 
 - creation of **spreadsheets and figures with performance results** from backtesting and optimization procedure.
 - **open-source code**, allowing **flexibility in adjusting the search space** and **implementing technical indicators**.
 
@@ -25,6 +25,7 @@ The project has the following structure:
  trading_strategy_optimizer/ 
  │  
  ├── trading_strategy_optimizer.py 
+ ├── trading_strategy_optimizer_app.py 
  |  
  ├── core/   
  │   ├── __init__.py  
@@ -34,7 +35,12 @@ The project has the following structure:
  │   ├── optimizer.py  
  │   ├── strategies.py  
  │   ├── exporter.py  
- │   └── notifier.py  
+ │   └── visualizer.py  
+ |  
+ ├── core_app/   
+ │   ├── __init__.py  
+ │   ├── gui.py  
+ │   ├── redirector.py  
  │  
  ├── config/  
  │   ├── config.json  

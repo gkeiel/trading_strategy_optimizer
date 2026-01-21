@@ -21,6 +21,7 @@ class Optimizer:
         with open(path, "r", encoding="utf-8") as f: config = json.load(f)
         self.sa_cfg = config.get("simulated_annealing", {})
         self.hc_cfg = config.get("hill_climbing", {})
+        self.ga_cfg = config.get("genetic_algorithm", {})
         self.gs_cfg = config.get("grid_search", {})
         
     def evaluate(self, indicator):
@@ -65,6 +66,8 @@ class Optimizer:
             best_params, best_score = self.hill_climbing(start_indicator=start_indicator)
         if self.gs_cfg.get("enabled"):
             best_params, best_score = self.grid_search(start_indicator=start_indicator)
+        if self.ga_cfg.get("enabled"):
+            best_params, best_score = self.genetic_algorithm(start_indicator=start_indicator)
         self.log.close()
         return self.data
     
@@ -89,18 +92,17 @@ class Optimizer:
 
         return x     
 
-    def hill_climbing(self, start_indicator, alpha=1, eps=1e-6, k_limit=5):
-        n            = self.hc_cfg.get("n", 3)
-        k_max        = self.hc_cfg.get("k_max", 50)
+    def hill_climbing(self, start_indicator, alpha=1, eps=1e-6, k_limit=10, k=0, k_no_improve=0):
+        alpha        = self.hc_cfg.get("alpha", 1)
+        N            = self.hc_cfg.get("n", 3)
+        k_max        = self.hc_cfg.get("k_max", 60)
         x_i          = start_indicator
         f_i, _, _    = self.evaluate(x_i)
-        k            = 0
-        k_no_improve = 0
                 
         while k < k_max:
             k = k +1
             
-            for _ in range(n):
+            for _ in range(N):
                 x_j       = self.random_neighbor(x_i, alpha)
                 f_j, _, _ = self.evaluate(x_j)
                 self.opt_local.append({"k": k, "score": f_i, "alpha": alpha, "params": x_j["ind_p"].copy()})
@@ -118,19 +120,18 @@ class Optimizer:
 
         return x_i, f_i
     
-    def simulated_annealing(self, start_indicator, alpha=1, beta_alpha=0.9, beta=0.95, eps=1e-6, k_limit=5):
-        n            = self.sa_cfg.get("n", 3)
-        k_max        = self.sa_cfg.get("k_max", 50)
+    def simulated_annealing(self, start_indicator, beta_alpha=0.9, beta=0.95, eps=1e-6, k_limit=10, k=0, k_no_improve=0):
+        alpha        = self.sa_cfg.get("alpha", 1)
+        N            = self.sa_cfg.get("n", 3)
+        k_max        = self.sa_cfg.get("k_max", 60)
+        T            = 1
         x_i          = start_indicator
         f_i, _, _    = self.evaluate(x_i)
-        T            = 1
-        k            = 0
-        k_no_improve = 0
         
         while k < k_max:
             k = k +1
             
-            for _ in range(n):
+            for _ in range(N):
                 x_j       = self.random_neighbor(x_i, alpha)
                 f_j, _, _ = self.evaluate(x_j)
                 self.opt_local.append({"k": k, "score": f_j, "T": T, "alpha": alpha, "params": x_j["ind_p"].copy()})
@@ -156,6 +157,57 @@ class Optimizer:
         self.log.flush()
         return x_i, f_i
     
+    def genetic_algorithm(self, start_indicator, eps=1e-6, k_limit=10, k=0, k_no_improve=0):
+        alpha      = self.ga_cfg.get("alpha", 1)
+        N          = self.ga_cfg.get("n", 3)
+        k_max      = self.ga_cfg.get("k_max", 60)
+        x_i        = start_indicator
+        f_i, _, _  = self.evaluate(x_i)
+        population = []
+        
+        while k < k_max:
+            k = k +1
+            new_population = []
+        
+            while len(new_population) < N:
+                
+                if len(population) < 2:
+                    x_j = self.random_neighbor(x_i, alpha)
+                
+                else:
+                    # tournament selection
+                    p1 = max(random.sample(population, 2), key=lambda p: p["f"])
+                    p2 = max(random.sample(population, 2), key=lambda p: p["f"])
+
+                    # uniform crossing
+                    x_j = copy.deepcopy(p1["x"])
+                    for i in range(len(x_j["ind_p"])):
+                        if random.random() < 0.5: x_j["ind_p"][i] = p2["x"]["ind_p"][i]
+
+                    # mutation (neighbor solution)
+                    x_j = self.random_neighbor(x_j, alpha)
+                    
+                f_j, _, _ = self.evaluate(x_j)
+                self.opt_local.append({"k": k, "score": f_j, "alpha": alpha, "params": x_j["ind_p"].copy()})
+                new_population.append({"x": x_j, "f": f_j})
+
+            population = new_population
+            gen_best   = max(population, key=lambda p: p["f"])
+
+            if gen_best["f"] > f_i +eps:
+                x_i = copy.deepcopy(gen_best["x"])
+                f_i = gen_best["f"]
+                k_no_improve = 0
+            else:
+                k_no_improve += 1
+
+            self.opt_global.append({"k": k, "score": f_i, "alpha": alpha, "params": x_i["ind_p"].copy()})
+            self.log.write(f"k = {k}: x = {x_i} | f(x) = {f_i:.4f} | alpha = {alpha:.2f}\n")
+            if k_no_improve >= k_limit: break
+
+        self.log.flush()
+        return x_i, f_i
+
     def grid_search(self, start_indicator):
         alpha = self.gs_cfg.get("alpha", 5)
         grid  = [range(p["min"], p["max"]+1, alpha) for p in self.space["params"]]        
@@ -166,7 +218,7 @@ class Optimizer:
             k = k+1       
             x_i       = {"ind_t": start_indicator["ind_t"], "ind_p": list(params)}           
             f_i, _, _ = self.evaluate(x_i)
-            self.opt_local.append({"k": k, "score": f_i, "T": None, "alpha": None, "params": x_i["ind_p"].copy()})
+            self.opt_local.append({"k": k, "score": f_i, "T": None, "alpha": alpha, "params": x_i["ind_p"].copy()})
             self.log.write(f"k = {k}: x = {x_i} | f(x) = {f_i:.4f}\n")
             
         self.opt_global = self.opt_local

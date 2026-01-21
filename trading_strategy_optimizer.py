@@ -17,6 +17,7 @@ def run_tso(on_log=None):
     loader       = Loader("config/config.json", "config/tickers.json")
     tickers      = loader.load_tickers()
     search_space = loader.load_search_space()
+    flag_plot    = True
     
     # initialize cache dictionaries
     raw_data = {}
@@ -59,7 +60,8 @@ def run_tso(on_log=None):
                 }
                 
                 visualizer = Visualizer(df)
-                visualizer.plot_results(label)
+                if flag_plot:
+                    visualizer.plot_results(label)
             
             visualizer.plot_optimization(optimization.opt_global, optimization.opt_local, label)
 
