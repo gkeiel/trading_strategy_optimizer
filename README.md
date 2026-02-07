@@ -75,8 +75,10 @@ The project currently supports the following indicators:
    ```bash
     pip install pandas
     pip install numpy
+    pip install matplotlib
     pip install yfinance
     pip install requests
+    pip install openpyxl
     ```
 
 2. **Configure parameters and tickers**
@@ -93,14 +95,9 @@ The project currently supports the following indicators:
 
 - **Backtest charts for MACD strategy**
   
-  After running `trading_strategy_optimizer.py` optimization it is generated strategy charts, spreadsheets for each ticker, and a summary with best results. The generated figures follow the example:
+  After running `trading_strategy_optimizer.py` optimization it is generated strategy charts, spreadsheets for each ticker, and a summary with best results. The generated figure (for each combination evaluated) follows the example:
 
   <p align="center">
-    <img
-      src="images/TSLA.png"
-      alt="Optimization"
-      width="733"
-    />
     <img
       src="images/TSLA_backtest.png"
       alt="Optimization"
@@ -108,7 +105,7 @@ The project currently supports the following indicators:
     />
   </p>
 
-  Notice that the asset ends the evaluated periodo at 1.75 times its initial price, so a Buy & hold strategy would yield 175% return. On the other hand, strictly following the MACD 20/28/9 strategy would produce above 300% return over the same period, excluding any transactions fees.
+  Notice that the asset ends the evaluated periodo at 1.75 times its initial price, so a Buy & hold strategy would yield 175% return. On the other hand, strictly following the MACD 17/22/11 strategy would produce approximately 350% return over the same period, excluding any transactions fees.
 
 - **Optimization log and charts for MACD strategy**
 
@@ -169,30 +166,36 @@ The project currently supports the following indicators:
 
   <p align="center">
     <img
-      src="images/TSLA_optimization.png"
+      src="images/TSLA_optimization_GS.png"
       alt="Optimization"
       width="733"
     />
     <img
-      src="images/TSLA_optimization_heatmap.png"
+      src="images/TSLA_optimization_SA.png"
+      alt="Optimization"
+      width="733"
+    />
+    <img
+      src="images/TSLA_exploration.png"
       alt="Optimization"
       width="733"
     />
   </p>
 
+  Notice how Grid Search performs an exhaustive search in the solution space (1728 evaluations), which requires significant time and computational effort. On the other hand, optimization with Simulated Annealing approaches the global maximum (Score = 3.20) after a few iterations.
+
 ## 📌 Notes
 
 - Contributions are welcome! Open an issue or submit a pull request.
 - Future improvements and new features may be added, including:
-  - migration to object-oriented programming (OOP); ✅
   - improve objective function with new weights and presets; ✅
   - improve optimization techniques;
   - file saving in cloud.
 
 ## 🤝 Support
 
-This repository is independently maintained, only in free time. If you find the code useful and wish to support its continued development, consider donating:
+This repository is independently maintained, in free time. If you find the code useful and wish to support its continued development, consider donating:
 
 - [PayPal](https://www.paypal.com/donate/?hosted_button_id=BF6E8J7P32KWE)  
 
-Your support helps keep the project alive and evolving, by adding new optimization methods, improvements and documentation.
+Your support helps keep the project alive and evolving, by adding new optimization methods, improvements and detailed documentation.
